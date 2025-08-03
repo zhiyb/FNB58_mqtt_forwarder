@@ -67,9 +67,9 @@ class Dev:
                 print(f"model = {model}, fw_ver = {fw_ver}, sn = {sn}, boot_cnt = {boot_cnt}, unknown0 = {unknown0}")
 
                 self.topic = f"FNIRSI/FNB{model}_{sn}"
-                msgs.append(("fw_version", f"{fw_ver}"))
-                msgs.append(("boot", f"{boot_cnt}"))
-                msgs.append(("unknown/3", f"{unknown0}"))
+                msgs.append(("fw_version", f"{fw_ver}", True))
+                msgs.append(("boot", f"{boot_cnt}", True))
+                msgs.append(("unknown/3", f"{unknown0}", True))
 
             elif typ == 0x04:
                 if plen != 12:
@@ -82,9 +82,9 @@ class Dev:
                 power = u32(pld[8:12]) / 10000.0
                 print(f"V = {volt}, I = {amp}, power = {power}")
 
-                msgs.append(("voltage", f"{volt:.4f}"))
-                msgs.append(("current", f"{amp:.4f}"))
-                msgs.append(("power", f"{power:.4f}"))
+                msgs.append(("voltage", f"{volt:.4f}", False))
+                msgs.append(("current", f"{amp:.4f}", False))
+                msgs.append(("power", f"{power:.4f}", False))
 
             elif typ == 0x05:
                 if plen != 7:
@@ -97,9 +97,9 @@ class Dev:
                 temp = u16(pld[5:7]) / 10.0
                 print(f"res = {res}, T = {temp}, unknown0 = {unknown0}")
 
-                msgs.append(("resistance", f"{res:.4f}"))
-                msgs.append(("temperature", f"{temp:.1f}"))
-                msgs.append(("unknown/5", f"{unknown0}"))
+                msgs.append(("resistance", f"{res:.4f}", False))
+                msgs.append(("temperature", f"{temp:.1f}", False))
+                msgs.append(("unknown/5", f"{unknown0}", False))
 
             elif typ == 0x06:
                 if plen != 6:
@@ -112,9 +112,9 @@ class Dev:
                 unknown0 = u16(pld[4:6])
                 print(f"D+ = {dp}, D- = {dm}, unknwon0 = {unknown0}")
 
-                msgs.append(("dp_voltage", f"{dp:.3f}"))
-                msgs.append(("dm_voltage", f"{dm:.3f}"))
-                msgs.append(("unknown/6", f"{unknown0}"))
+                msgs.append(("dp_voltage", f"{dp:.3f}", False))
+                msgs.append(("dm_voltage", f"{dm:.3f}", False))
+                msgs.append(("unknown/6", f"{unknown0}", False))
 
             elif typ == 0x07:
                 if plen != 4:
@@ -147,18 +147,18 @@ class Dev:
                 print(f"charging group {group}, NRG = {nrg}, CAP = {cap}, "
                       f"TIM = {t_h:02}:{t_m:02}:{t_s:02}, runtime = {rt_h:02}:{rt_m:02}:{rt_s:02}")
 
-                msgs.append((f"battery/{group}/NRG", f"{nrg:.5f}"))
-                msgs.append((f"battery/{group}/CAP", f"{cap:.5f}"))
-                msgs.append((f"battery/{group}/time", f"{t}"))
-                msgs.append(("runtime", f"{rt}"))
+                msgs.append((f"battery/{group}/NRG", f"{nrg:.5f}", False))
+                msgs.append((f"battery/{group}/CAP", f"{cap:.5f}", False))
+                msgs.append((f"battery/{group}/time", f"{t}", False))
+                msgs.append(("runtime", f"{rt}", False))
 
             else:
                 print(f"Unknown type {typ}, plen {plen}: {seg}")
 
         if not self.topic:
             raise RuntimeError("Unknown device name")
-        for topic, value in msgs:
-            self.mqttc.publish(f"{self.topic}/{topic}", value, retain=False)
+        for topic, value, retain in msgs:
+            self.mqttc.publish(f"{self.topic}/{topic}", value, retain=retain)
 
 
 async def loop(mqttc):
@@ -197,7 +197,7 @@ async def run(mqttc):
             await loop(mqttc)
         except:
             traceback.print_exc()
-        await asyncio.sleep(2)
+        await asyncio.sleep(5)
 
 
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
