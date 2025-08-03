@@ -41,6 +41,7 @@ def process_frame(data):
                 print(f"Unexpected length: {seg}")
                 continue
 
+            # Device information
             model = u16(pld[0:2])
             fw_ver = u16(pld[2:4])
             sn = u32(pld[4:8])
@@ -53,6 +54,7 @@ def process_frame(data):
                 print(f"Unexpected length: {seg}")
                 continue
 
+            # Higher precision measurements
             volt = u32(pld[0:4])
             amp = u32(pld[4:8])
             power = u32(pld[8:12])
@@ -74,6 +76,7 @@ def process_frame(data):
                 print(f"Unexpected length: {seg}")
                 continue
 
+            # D+/D- and protocol status
             dp = u16(pld[0:2])
             dm = u16(pld[2:4])
             unknown0 = u16(pld[4:6])
@@ -84,6 +87,7 @@ def process_frame(data):
                 print(f"Unexpected length: {seg}")
                 continue
 
+            # Lower precision measurements
             volt = u16(pld[0:2])
             amp = u16(pld[2:4])
             print(f"V = {volt/1000.0}, I = {amp/1000.0}")
@@ -93,6 +97,7 @@ def process_frame(data):
                 print(f"Unexpected length: {seg}")
                 continue
 
+            # Charging statistics
             group = pld[0]
             nrg = u32(pld[1:5])
             cap = u32(pld[5:9])
