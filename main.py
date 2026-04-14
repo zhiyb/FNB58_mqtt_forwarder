@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import time
 import asyncio
 import binascii
 import traceback
@@ -205,7 +206,14 @@ mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 #mqttc.on_message = on_message
 
 mqttc.username_pw_set(mqtt_user, mqtt_password)
-mqttc.connect(mqtt_server, mqtt_port, 60)
+
+while True:
+    try:
+        mqttc.connect(mqtt_server, mqtt_port, 60)
+        break
+    except:
+        traceback.print_exc()
+        time.sleep(10)
 
 mqttc.loop_start()
 
